@@ -1,0 +1,25 @@
+{
+  "name": "codename-app",
+  "version": "0.0.0",
+  "description": "Web app for codename generator",
+  "main": "index.js",
+  "repository": "git://git@github.com:rjz/codename-app.git",
+  "scripts": {
+    "start": "node node_modules/nodemon/nodemon index",
+    "test": "find . -name '*.js' | grep -v node_modules | ./node_modules/jshint/bin/jshint && ./node_modules/mocha/bin/mocha test/**/*_spec.js"
+  },
+  "author": "RJ Zaworski <rj@rjzaworski.com>",
+  "license": "WTFPL",
+  "dependencies": {
+    "codename": "0.0.1",
+    "lodash": "~2.4.1",
+    "express": "~3.4.8",
+    "bunyan": "~0.22.1"
+  },
+  "devDependencies": {
+    "nodemon": "~0.7.10",
+    "jshint": "~2.4.1",
+    "supertest-session": "0.0.1",
+    "mocha": "~1.17.1"
+  }
+}
