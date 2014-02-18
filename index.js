@@ -29,7 +29,7 @@ app.use(mw.requestLogger);
 
 app.post('/codenames', function (req, res, next) {
 
-  var filters, listNames;
+  var filters, listNames, result;
 
   if (!_.has(req.query, 'lists') || _.isEmpty(req.query.lists)) {
     return next(errors.badRequest('No lists specified'));
@@ -42,7 +42,14 @@ app.post('/codenames', function (req, res, next) {
   listNames = req.query.lists.split(',');
   filters = req.query.filters.split(',');
 
-  res.send(200, [codename.generate(filters, listNames).join(' ')]);
+  result = codename.generate(filters, listNames);
+
+  if (result instanceof ReferenceError) {
+    next(errors.notFound(result.message));
+  }
+  else {
+    res.send(200, [result.join(' ')]);
+  }
 });
 
 app.use(app.router);
