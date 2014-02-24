@@ -9,7 +9,7 @@ var ensure = require('./ensure');
 var exports = module.exports = {};
 
 exports.session = function () {
-  ensure.absenceOf('session');
+  ensure.available('session');
   before(function () {
     this.session = new Session();
   });

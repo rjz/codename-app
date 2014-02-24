@@ -1,5 +1,21 @@
 var errors = require('./errors');
 
+var hogan = require('hogan.js'),
+    fs = require('fs'),
+    path = require('path');
+
+var templateDir = './client/templates',
+    templates = {};
+
+// Read in templates
+fs.readdirSync(templateDir).forEach(function (entry) {
+  var name;
+  if (path.extname(entry) === '.hogan') {
+    name = path.basename(entry, '.hogan');
+    templates[name] = hogan.compile(fs.readFileSync(path.join(templateDir, entry)).toString());
+  }
+});
+
 // Argument is a bunyan-compatible logger
 module.exports = function (logger) {
 
@@ -15,6 +31,24 @@ module.exports = function (logger) {
       }
     });
   }
+
+  exports.index = function (req, res, next) {
+
+    var lists = [
+      { id: 'foo', title: 'bar', name: 'foo', value: 'baz' }
+    ];
+
+    res.format({
+      html: function () {
+        res.send(templates.layout.render({ lists: lists.map(function (x) {
+          return templates.checkbox.render(x);
+        })}));
+      },
+      json: function () {
+        next();
+      }
+    });
+  };
 
   exports.errorHandler = function errorHandler (err, req, res, next) {
 

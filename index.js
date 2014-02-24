@@ -18,16 +18,20 @@ var app = module.exports = express();
 app.use(express.timeout(5000));
 app.use(mw.requestLogger);
 
+app.use(express.static(path.resolve(__dirname, 'client')));
+
+app.use(mw.index); // catch-all for HTML requests
+
 // GET /lists
 // GET /filters
 ['filters', 'lists'].forEach(function (k) {
   var data = codename[k]();
-  app.get('/' + k, function (req, res, next) {
+  app.get('/api/' + k, function (req, res, next) {
     res.json(200, data);
   });
 });
 
-app.post('/codenames', function (req, res, next) {
+app.get('/api/codenames', function (req, res, next) {
 
   var filters, listNames, result;
 
