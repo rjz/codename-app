@@ -6,7 +6,7 @@
   "repository": "git://git@github.com:rjz/codename-app.git",
   "scripts": {
     "start": "node index | bunyan",
-    "test": "find . -name '*.js' | grep -v node_modules | ./node_modules/jshint/bin/jshint && ./node_modules/mocha/bin/mocha test/**/*_spec.js"
+    "test": "./node_modules/jshint/bin/jshint . && ./node_modules/mocha/bin/mocha test/**/*_spec.js | bunyan"
   },
   "author": "RJ Zaworski <rj@rjzaworski.com>",
   "license": "WTFPL",
