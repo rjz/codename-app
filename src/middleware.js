@@ -1,4 +1,5 @@
-var errors = require('./errors');
+var errors = require('./errors'),
+    _ = require('lodash');
 
 var hogan = require('hogan.js'),
     fs = require('fs'),
@@ -16,21 +17,21 @@ fs.readdirSync(templateDir).forEach(function (entry) {
   }
 });
 
+function sendError (res, err) {
+  res.format({
+    json: function () {
+      res.json(err.status, {
+        status: err.status,
+        description: err.message
+      });
+    }
+  });
+}
+
 // Argument is a bunyan-compatible logger
 module.exports = function (logger) {
 
   var exports = {};
-
-  function sendError (res, err) {
-    res.format({
-      json: function () {
-        res.json(err.status, {
-          status: err.status,
-          description: err.message
-        });
-      }
-    });
-  }
 
   exports.index = function (req, res, next) {
 
@@ -48,6 +49,15 @@ module.exports = function (logger) {
         next();
       }
     });
+  };
+
+  exports.ensureQueryHas = function (name) {
+    return function ensureQueryHas (req, res, next) {
+      if (!_.has(req.query, name) || _.isEmpty(req.query[name])) {
+        return next(errors.badRequest(name + ' parameter is required'));
+      }
+      next();
+    };
   };
 
   exports.errorHandler = function errorHandler (err, req, res, next) {

@@ -20,7 +20,7 @@ app.use(mw.requestLogger);
 
 app.use(express.static(path.resolve(__dirname, 'client')));
 
-app.use(mw.index); // catch-all for HTML requests
+//app.use(mw.index); // catch-all for HTML requests
 
 // GET /lists
 // GET /filters
@@ -31,30 +31,27 @@ app.use(mw.index); // catch-all for HTML requests
   });
 });
 
-app.get('/api/codenames', function (req, res, next) {
+app.get('/api/codenames',
 
-  var filters, listNames, result;
+  mw.ensureQueryHas('filters'),
+  mw.ensureQueryHas('lists'),
 
-  if (!_.has(req.query, 'lists') || _.isEmpty(req.query.lists)) {
-    return next(errors.badRequest('No lists specified'));
-  }
+  function (req, res, next) {
 
-  if (!_.has(req.query, 'filters') || _.isEmpty(req.query.filters)) {
-    return next(errors.badRequest('No filters specified'));
-  }
+    var filters, listNames, result;
 
-  listNames = req.query.lists.split(',');
-  filters = req.query.filters.split(',');
+    listNames = req.query.lists.split(',');
+    filters = req.query.filters.split(',');
 
-  result = codename.generate(filters, listNames);
+    result = codename.generate(filters, listNames);
 
-  if (result instanceof ReferenceError) {
-    next(errors.notFound(result.message));
-  }
-  else {
-    res.send(200, [result.join(' ')]);
-  }
-});
+    if (result instanceof ReferenceError) {
+      next(errors.notFound(result.message));
+    }
+    else {
+      res.send(200, [result.join(' ')]);
+    }
+  });
 
 app.use(app.router);
 
