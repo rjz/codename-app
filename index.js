@@ -1,26 +1,50 @@
 var _ = require('lodash'),
     bunyan = require('bunyan'),
     express = require('express'),
+    createServer = require('leadballoon'),
+    errors = require('http-error-factories'),
     path = require('path');
 
 var codename = require('codename')();
+var config = require('./src/config');
 
 var logger = bunyan.createLogger({
   name: 'Blistering Honeybee',
-  serializers: bunyan.stdSerializers
+  serializers: _.extend(bunyan.stdSerializers, {
+    req: function (req) {
+      return {
+        ip: req.ip,
+        method: req.method,
+        url: req.originalUrl
+      };
+    },
+    res: function (res) {
+      return {
+        status: res.statusCode
+      };
+    }
+  }),
+  level: config.logLevel
 });
 
-var mw = require(path.resolve(__dirname, 'src/middleware'))(logger),
-    errors = require(path.resolve(__dirname, 'src/errors'));
+var mw = require(path.resolve(__dirname, 'src/middleware'))(logger);
 
 var app = module.exports = express();
 
-app.use(express.timeout(5000));
 app.use(mw.requestLogger);
+app.use(express.timeout(5000));
 
-app.use(express.static(path.resolve(__dirname, 'client')));
+app.use(express.cookieParser());
+app.use(express.session({
+  key: config.sessionKey,
+  secret: config.sessionSecret
+}));
 
-//app.use(mw.index); // catch-all for HTML requests
+//app.use(mw.acceptTypes(['json','html']));
+
+//app.use(express.static(path.resolve(__dirname, 'client')));
+
+app.use(mw.index); // catch-all for HTML requests
 
 // GET /lists
 // GET /filters
@@ -60,5 +84,20 @@ app.all('*', function (req, res, next) {
 });
 
 app.use(mw.errorHandler);
-app.listen(3202);
+logger.info('Listening', { port: config.port });
+
+var server = createServer(app, {
+  timeout: config.requestTimeout
+});
+
+server.listen(config.port);
+
+server.on('close', function (err) {
+  if (err) {
+    logger.error('Went down hard', { err: err });
+    process.exit(1);
+  }
+
+  process.exit(0);
+});
 

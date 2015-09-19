@@ -1,5 +1,5 @@
-var errors = require('./errors'),
-    _ = require('lodash');
+var _ = require('lodash');
+var errors = require('http-error-factories');
 
 var hogan = require('hogan.js'),
     fs = require('fs'),
@@ -20,15 +20,11 @@ fs.readdirSync(templateDir).forEach(function (entry) {
 function sendError (res, err) {
   res.format({
     json: function () {
-      res.json(err.status, {
-        status: err.status,
-        description: err.message
-      });
+      res.json(err.status, err.toJSON());
     }
   });
 }
 
-// Argument is a bunyan-compatible logger
 module.exports = function (logger) {
 
   var exports = {};
@@ -51,6 +47,13 @@ module.exports = function (logger) {
     });
   };
 
+  exports.acceptTypes = function (types) {
+    return function acceptTypes (req, res, next) {
+      if (req.accepts(types)) return next();
+      next(errors.notAcceptable());
+    };
+  };
+
   exports.ensureQueryHas = function (name) {
     return function ensureQueryHas (req, res, next) {
       if (!_.has(req.query, name) || _.isEmpty(req.query[name])) {
@@ -62,17 +65,17 @@ module.exports = function (logger) {
 
   exports.errorHandler = function errorHandler (err, req, res, next) {
 
-    if (!err.status) {
+    if (!errors.hasOwnProperty(err.name)) {
       // Something went unhandled...
       logger.error({ err: err });
-      return sendError(res, errors.internal());
+      return sendError(res, errors.internalServerError());
     }
 
     switch (err.name) {
-      case 'internal':   logger.error({ err: err }); break;
-      case 'notFound':   logger.warn({ err: err }); break;
-      case 'badRequest': logger.info({ err: err }); break;
-      default: logger.warn({ err: err });
+      case 'internal'   : logger.error({ err: err }); break;
+      case 'notFound'   : logger.warn({ err: err }); break;
+      case 'badRequest' : logger.info({ err: err }); break;
+      default           : logger.warn({ err: err });
     }
 
     sendError(res, err);
@@ -80,7 +83,19 @@ module.exports = function (logger) {
 
   // For use with bunyan.
   exports.requestLogger = function requestLogger (req, res, next) {
-    logger.info({ req: req, res: res });
+    var _end = res.end,
+        t0 = Date.now();
+
+    res.end = function () {
+      logger.info({
+        req: req,
+        res: res,
+        dt: (Date.now() - t0)
+      });
+
+      _end.apply(this, arguments);
+    };
+
     next();
   };
 
