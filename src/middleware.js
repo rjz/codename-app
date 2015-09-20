@@ -3,19 +3,7 @@
 var _ = require('lodash');
 var errors = require('http-error-factories');
 
-var hogan = require('hogan.js'),
-    fs = require('fs'),
-    path = require('path');
-
-var React = require('react');
-
-let HelloWorldComponent = require('../components/HelloWorld.jsx');
-
 const DEFAULT_ERROR_MESSAGE = 'Something terrible has happened';
-
-const templatePath = path.resolve(__dirname, '../client/templates/layout.hogan')
-const templateString = fs.readFileSync(templatePath).toString()
-const template = hogan.compile(templateString)
 
 function sendError (res, err) {
   res.format({
@@ -28,24 +16,6 @@ function sendError (res, err) {
 module.exports = (logger, codename) => {
 
   return {
-
-    index (req, res, next) {
-      res.format({
-        json () {
-          return next()
-        },
-        html: function () {
-
-          const props = { name: 'world' };
-
-          let title = 'Codenames.'
-
-          res.send(template.render({ title,
-            html: React.renderToString(React.createElement(HelloWorldComponent, props))
-          }));
-        }
-      })
-    },
 
     ensureQueryHas (name) {
       return (req, res, next) => {
@@ -88,6 +58,5 @@ module.exports = (logger, codename) => {
       next();
     }
   }
-
 };
 
