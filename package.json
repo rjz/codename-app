@@ -1,6 +1,9 @@
 {
   "name": "codename-app",
   "version": "0.0.0",
+  "engines" : {
+    "node" : ">=4.0.0"
+  },
   "description": "Web app for codename generator",
   "main": "index.js",
   "repository": "git://git@github.com:rjz/codename-app.git",
