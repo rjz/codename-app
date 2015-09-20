@@ -20,26 +20,31 @@ fs.readdirSync(templateDir).forEach(function (entry) {
 function sendError (res, err) {
   res.format({
     json: function () {
-      res.json(err.status, err.toJSON());
+      res.status(err.code)
+        .json({ message: err.toJSON().message });
     }
   });
 }
 
-module.exports = function (logger) {
+module.exports = function (logger, codename) {
 
   var exports = {};
 
+  var listsTemplate = codename.lists().map(function (x) {
+    return templates.checkbox.render(x);
+  });
+
+  var filtersTemplate = codename.filters().map(function (x) {
+    return templates.checkbox.render(x);
+  });
+
   exports.index = function (req, res, next) {
-
-    var lists = [
-      { id: 'foo', title: 'bar', name: 'foo', value: 'baz' }
-    ];
-
     res.format({
       html: function () {
-        res.send(templates.layout.render({ lists: lists.map(function (x) {
-          return templates.checkbox.render(x);
-        })}));
+        res.send(templates.layout.render({
+          lists: listsTemplate,
+          filters: filtersTemplate
+        }));
       },
       json: function () {
         next();
@@ -64,18 +69,14 @@ module.exports = function (logger) {
   };
 
   exports.errorHandler = function errorHandler (err, req, res, next) {
-
-    if (!errors.hasOwnProperty(err.name)) {
-      // Something went unhandled...
-      logger.error({ err: err });
-      return sendError(res, errors.internalServerError());
+    if (err instanceof errors.BadRequestError) {
+      logger.info({ err: err });
     }
-
-    switch (err.name) {
-      case 'internal'   : logger.error({ err: err }); break;
-      case 'notFound'   : logger.warn({ err: err }); break;
-      case 'badRequest' : logger.info({ err: err }); break;
-      default           : logger.warn({ err: err });
+    else if (err instanceof errors.NotFoundError) {
+      logger.info({ err: err });
+    }
+    else {
+      logger.error({ err: err });
     }
 
     sendError(res, err);

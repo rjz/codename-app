@@ -9,7 +9,9 @@
   "repository": "git://git@github.com:rjz/codename-app.git",
   "scripts": {
     "start": "node index | bunyan",
-    "test": "./node_modules/jshint/bin/jshint . && ./node_modules/mocha/bin/mocha test/**/*_spec.js | bunyan"
+    "lint": "jshint",
+    "pretest": "npm run lint",
+    "test": "jasmine-node --forceexit test 2> last_test_log.txt"
   },
   "author": "RJ Zaworski <rj@rjzaworski.com>",
   "license": "WTFPL",
@@ -20,12 +22,13 @@
     "express": "~3.4.8",
     "hogan.js": "~2.0.0",
     "http-error-factories": "0.0.2",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "object-assign": "^4.0.1"
   },
   "devDependencies": {
-    "nodemon": "~0.7.10",
+    "jasmine-node": "^1.14.5",
     "jshint": "~2.4.1",
-    "supertest-session": "0.0.1",
-    "mocha": "~1.17.1"
+    "nodemon": "~0.7.10",
+    "supertest-session": "^1.0.0"
   }
 }
