@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="app.js"></script>
+    <link rel="stylesheet" href="bower_components/flatui/css/flat-ui.css" />
+    <title>{{ title }}</title>
+  </head>
+  <body>
+    {{{ html }}}
+  </body>
+</html>
+

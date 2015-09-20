@@ -1,8 +1,8 @@
-var config = require('../../src/config');
-var logger = require('../../src/logger')(config);
+var config = require('../src/config');
+var logger = require('../src/logger')(config);
 
 var Session = require('supertest-session')({
-  app: require('../../app')(config, logger)
+  app: require('../app')(config, logger)
 });
 
 describe('GET /api/filters', () => {

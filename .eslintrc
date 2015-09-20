@@ -1,0 +1,15 @@
+{
+  "env": {
+    "node": true,
+    "jasmine": true
+  },
+  "ecmaFeatures": {
+    "arrowFunctions": true,
+    "blockBindings": true,
+    "objectLiteralShorthandMethods": true,
+    "objectLiteralShorthandProperties": true,
+    "classes": true,
+    "modules": true,
+    "jsx": true
+  }
+}

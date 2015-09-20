@@ -1,12 +1,19 @@
+'use strict'
+
 var express = require('express');
 var errors = require('http-error-factories');
 var codename = require('codename')();
 
-module.exports = function (config, logger) {
+require('node-jsx').install();
+
+module.exports = (config, logger) => {
 
   var app = express();
 
   var mw = require('./src/middleware')(logger, codename);
+
+  const lists = codename.lists()
+  const filters = codename.filters()
 
   app.use(mw.requestLogger);
 
@@ -23,39 +30,46 @@ module.exports = function (config, logger) {
   //app.use(express.static(path.resolve(__dirname, 'client')));
 
   // GET /lists
+  app.get('/api/lists', (req, res, next) => {
+    res.format({
+      json () {
+        res.json(lists);
+      }
+    })
+  })
+
   // GET /filters
-  ['filters', 'lists'].forEach(function (k) {
-    var data = codename[k]();
-    app.get('/api/' + k, function (req, res, next) {
-      res.json(200, data);
-    });
-  });
+  app.get('/api/filters', (req, res, next) => {
+    res.format({
+      json () {
+        res.json(filters);
+      }
+    })
+  })
 
   app.get('/api/codenames',
 
     mw.ensureQueryHas('filters'),
     mw.ensureQueryHas('lists'),
 
-    function (req, res, next) {
+    (req, res, next) => {
 
-      var filters, listNames, result;
+      const listNames = req.query.lists.split(',');
+      const filters = req.query.filters.split(',');
 
-      listNames = req.query.lists.split(',');
-      filters = req.query.filters.split(',');
-
-      result = codename.generate(filters, listNames);
+      const result = codename.generate(filters, listNames);
 
       if (result instanceof ReferenceError) {
         next(errors.notFound(result.message));
       }
       else {
-        res.send(200, [result.join(' ')]);
+        res.send([result.join(' ')]);
       }
     });
 
   app.use(app.router);
 
-  app.all('*', function (req, res, next) {
+  app.all('*', (req, res, next) => {
     next(errors.notFound(req.url));
   });
 

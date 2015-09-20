@@ -1,17 +1,18 @@
 {
   "name": "codename-app",
   "version": "0.0.0",
-  "engines" : {
-    "node" : ">=4.0.0"
+  "engines": {
+    "node": ">=4.0.0"
   },
   "description": "Web app for codename generator",
   "main": "index.js",
   "repository": "git://git@github.com:rjz/codename-app.git",
   "scripts": {
     "start": "node index | bunyan",
-    "lint": "jshint",
+    "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "jasmine-node --forceexit test 2> last_test_log.txt"
+    "test": "jasmine-node --forceexit test 2> last_test_log.txt",
+    "cover": "istanbul cover jasmine-node --forceexit test"
   },
   "author": "RJ Zaworski <rj@rjzaworski.com>",
   "license": "WTFPL",
@@ -23,11 +24,15 @@
     "hogan.js": "~2.0.0",
     "http-error-factories": "0.0.2",
     "lodash": "~2.4.1",
-    "object-assign": "^4.0.1"
+    "object-assign": "^4.0.1",
+    "react": "^0.13.3"
   },
   "devDependencies": {
+    "eslint": "^1.5.0",
+    "istanbul": "^0.3.20",
+    "jasmine": "^2.3.2",
     "jasmine-node": "^1.14.5",
-    "jshint": "~2.4.1",
+    "node-jsx": "^0.13.3",
     "nodemon": "~0.7.10",
     "supertest-session": "^1.0.0"
   }

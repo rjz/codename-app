@@ -1,0 +1,18 @@
+language: node_js
+
+node_js:
+  - 4.0
+
+sudo: false
+
+env:
+  global:
+    - NODE_ENV=test
+
+before_script:
+  - export PATH=$PATH:$PWD/node_modules/.bin
+
+script: npm run cover
+
+after_success: ./tasks/travis_after_success.sh
+
