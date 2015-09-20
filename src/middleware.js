@@ -47,13 +47,6 @@ module.exports = (logger, codename) => {
       })
     },
 
-    acceptTypes (types) {
-      return function acceptTypes (req, res, next) {
-        if (req.accepts(types)) return next();
-        next(errors.notAcceptable());
-      };
-    },
-
     ensureQueryHas (name) {
       return (req, res, next) => {
         if (!_.has(req.query, name) || _.isEmpty(req.query[name])) {

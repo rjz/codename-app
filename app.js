@@ -17,17 +17,7 @@ module.exports = (config, logger) => {
 
   app.use(mw.requestLogger);
 
-  app.use(express.cookieParser());
-  app.use(express.session({
-    key: config.sessionKey,
-    secret: config.sessionSecret
-  }));
-
   app.use(mw.index); // catch-all for HTML requests
-
-  //app.use(mw.acceptTypes(['json','html']));
-
-  //app.use(express.static(path.resolve(__dirname, 'client')));
 
   // GET /lists
   app.get('/api/lists', (req, res, next) => {
