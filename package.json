@@ -26,15 +26,14 @@
     "leadballoon": "0.0.2",
     "lodash": "~2.4.1",
     "object-assign": "^4.0.1",
+    "node-jsx": "^0.13.3",
     "react": "^0.13.3"
   },
   "devDependencies": {
     "coveralls": "^2.11.4",
     "eslint": "^1.5.0",
     "istanbul": "^0.3.20",
-    "jasmine": "^2.3.2",
     "jasmine-node": "^1.14.5",
-    "node-jsx": "^0.13.3",
     "nodemon": "~0.7.10",
     "supertest-session": "^1.0.0"
   }
