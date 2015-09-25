@@ -5,7 +5,7 @@ var config = require('./src/config');
 
 var logger = require('./src/logger')(config);
 
-var server = createServer(require('./app')(config, logger), {
+var server = createServer(require('./app')(config, logger).callback(), {
   timeout: config.requestTimeout
 });
 

@@ -6,10 +6,12 @@
   "ecmaFeatures": {
     "arrowFunctions": true,
     "blockBindings": true,
+    "classes": true,
+    "generators": true,
+    "jsx": true,
+    "modules": true,
     "objectLiteralShorthandMethods": true,
     "objectLiteralShorthandProperties": true,
-    "classes": true,
-    "modules": true,
-    "jsx": true
+    "templateStrings": true
   }
 }

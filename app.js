@@ -1,6 +1,7 @@
 'use strict'
 
-var express = require('express');
+var koa = require('koa');
+var route = require('koa-route');
 var errors = require('http-error-factories');
 var codename = require('codename')();
 
@@ -19,7 +20,7 @@ let HelloWorldComponent = require('./components/HelloWorld.jsx');
 
 module.exports = (config, logger) => {
 
-  var app = express();
+  var app = koa();
 
   var mw = require('./src/middleware')(logger, codename);
 
@@ -27,73 +28,50 @@ module.exports = (config, logger) => {
   const filters = codename.filters()
 
   app.use(mw.requestLogger);
+  app.use(mw.handleError);
 
-  // GET /lists
-  app.get('/api/lists', (req, res, next) => {
-    res.format({
-      json () {
-        res.json(lists);
-      }
-    })
-  })
+  app.use(route.get('/api/lists', function *() {
+    if (!this.accepts('json')) throw errors.notAcceptable();
+    this.body = lists
+  }))
 
-  // GET /filters
-  app.get('/api/filters', (req, res, next) => {
-    res.format({
-      json () {
-        res.json(filters);
-      }
-    })
-  })
+  app.use(route.get('/api/filters', function *() {
+    if (!this.accepts('json')) throw errors.notAcceptable();
+    this.body = filters
+  }))
 
-  app.get('/api/codenames',
+  app.use(route.get('/api/codenames', function *() {
 
-    mw.ensureQueryHas('filters'),
-    mw.ensureQueryHas('lists'),
+    if (!this.query.lists)
+      throw errors.badRequest('no lists specified');
 
-    (req, res, next) => {
+    if (!this.query.filters)
+      throw errors.badRequest('no filters specified');
 
-      const listNames = req.query.lists.split(',');
-      const filters = req.query.filters.split(',');
+    const listNames = this.query.lists.split(',');
+    const filters = this.query.filters.split(',');
 
-      const result = codename.generate(filters, listNames);
+    const result = codename.generate(filters, listNames);
 
-      if (result instanceof ReferenceError) {
-        next(errors.notFound(result.message));
-      }
-      else {
-        res.send([result.join(' ')]);
-      }
-    });
+    if (result instanceof ReferenceError) {
+      throw errors.notFound(result.message);
+    }
+    this.body = [result.join(' ')];
+  }));
 
-  app.get('/', (req, res) => {
-    res.format({
-      text () {
-        res.send('OK');
-      },
-      json () {
-        res.json({});
-      },
-      html: function () {
+  app.use(route.get('/', function *() {
 
-        const props = { name: 'world' };
+    const props = { name: 'world' };
 
-        let title = 'Codenames.'
+    let title = 'Codenames.';
+    let html = React.renderToString(React.createElement(HelloWorldComponent, props));
 
-        res.send(template.render({ title,
-          html: React.renderToString(React.createElement(HelloWorldComponent, props))
-        }));
-      }
-    })
-  })
+    this.body = template.render({ title, html });
+  }));
 
-  app.use(app.router);
-
-  app.all('*', (req, res, next) => {
-    next(errors.notFound(req.url));
+  app.use(function *() {
+    throw errors.notFound(`Not found ${this.originalUrl}`);
   });
-
-  app.use(mw.errorHandler);
 
   return app;
 };
