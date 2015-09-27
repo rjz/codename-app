@@ -1,5 +1,4 @@
-var _ = require('lodash'),
-    createServer = require('leadballoon');
+var createServer = require('leadballoon');
 
 var config = require('./src/config');
 
