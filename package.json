@@ -8,7 +8,7 @@
   "main": "index.js",
   "repository": "git://git@github.com:rjz/codename-app.git",
   "scripts": {
-    "start": "node index | bunyan",
+    "start": "node index 2>&1 | bunyan",
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "jasmine-node --forceexit test 2> last_test_log.txt",
@@ -17,7 +17,7 @@
   "author": "RJ Zaworski <rj@rjzaworski.com>",
   "license": "WTFPL",
   "dependencies": {
-    "bunyan": "~0.22.1",
+    "bunyan": "~1.5.1",
     "codename": "0.0.3",
     "confab": "0.0.8",
     "hogan.js": "~2.0.0",
