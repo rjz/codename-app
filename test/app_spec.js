@@ -1,21 +1,21 @@
 var config = require('../src/config');
 var logger = require('../src/logger')(config);
 
-var Session = require('supertest-session')({
-  app: require('../app')(config, logger).callback()
-});
+var app = require('../app')(config, logger).callback();
+
+var session = require('supertest-session');
 
 describe('GET /api/codenames', function () {
 
-  var session = null;
+  var testSession = null;
 
   beforeEach(() => {
-    session = new Session();
+    testSession = session(app);
   });
 
   describe('when no lists are specified', function () {
     it('receives bad request', function (done) {
-      session.get('/api/codenames?filters=alliterative')
+      testSession.get('/api/codenames?filters=alliterative')
         .set('accept', 'application/json')
         .expect(400)
         .end(done);
@@ -24,7 +24,7 @@ describe('GET /api/codenames', function () {
 
   describe('when no filters are specified', function () {
     it('receives bad request', (done) => {
-      session.get('/api/codenames?lists=crayons,cities')
+      testSession.get('/api/codenames?lists=crayons,cities')
         .set('accept', 'application/json')
         .expect(400)
         .end(done);
@@ -33,7 +33,7 @@ describe('GET /api/codenames', function () {
 
   describe('when all fields are provided', function () {
     it('receives bad request', (done) => {
-      session.get('/api/codenames?lists=crayons,cities&filters=alliterative')
+      testSession.get('/api/codenames?lists=crayons,cities&filters=alliterative')
         .set('accept', 'application/json')
         .expect(200)
         .end(done);
@@ -43,14 +43,14 @@ describe('GET /api/codenames', function () {
 
 describe('unknown routes', function () {
 
-  var session = null;
+  var testSession = null;
 
   beforeEach(() => {
-    session = new Session();
+    testSession = session(app);
   });
 
   it('receives bad request', (done) => {
-    session.get('/api/fhqwhgads')
+    testSession.get('/api/fhqwhgads')
       .set('accept', 'application/json')
       .expect(404)
       .end(done);

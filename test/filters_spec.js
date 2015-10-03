@@ -1,20 +1,20 @@
 var config = require('../src/config');
 var logger = require('../src/logger')(config);
 
-var Session = require('supertest-session')({
-  app: require('../app')(config, logger).callback()
-});
+var app = require('../app')(config, logger).callback();
+
+var session = require('supertest-session');
 
 describe('GET /api/filters', () => {
 
-  var session = null;
+  var testSession = null;
 
   beforeEach(() => {
-    session = new Session();
+    testSession = session(app);
   });
 
   it('should serve a list of filters', (done) => {
-    session.get('/api/filters')
+    testSession.get('/api/filters')
       .set('accept', 'application/json')
       .expect(200)
       .expect(/alliterative/)
