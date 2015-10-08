@@ -2,21 +2,22 @@
 
 var koa = require('koa');
 var route = require('koa-route');
+var cors = require('koa-cors');
+var assets = require('koa-static');
 var errors = require('http-error-factories');
 var codename = require('codename')();
 
-var React = require('react');
 var hogan = require('hogan.js');
 var fs = require('fs');
 var path = require('path');
 
-const templatePath = path.resolve(__dirname, './client/templates/layout.hogan')
+const templatePath = path.resolve(__dirname, './client/index.hogan')
 const templateString = fs.readFileSync(templatePath).toString()
 const template = hogan.compile(templateString)
 
-require('node-jsx').install();
-
-let HelloWorldComponent = require('./components/HelloWorld.jsx');
+function apiRoute (path) {
+  return '/api' + path;
+};
 
 module.exports = (config, logger) => {
 
@@ -29,18 +30,19 @@ module.exports = (config, logger) => {
 
   app.use(mw.requestLogger);
   app.use(mw.handleError);
+  app.use(cors());
 
-  app.use(route.get('/api/lists', function *() {
+  app.use(route.get(apiRoute('/lists'), function *() {
     if (!this.accepts('json')) throw errors.notAcceptable();
     this.body = lists
   }))
 
-  app.use(route.get('/api/filters', function *() {
+  app.use(route.get(apiRoute('/filters'), function *() {
     if (!this.accepts('json')) throw errors.notAcceptable();
     this.body = filters
   }))
 
-  app.use(route.get('/api/codenames', function *() {
+  app.use(route.get(apiRoute('/codenames'), function *() {
 
     if (!this.query.lists)
       throw errors.badRequest('no lists specified');
@@ -64,10 +66,12 @@ module.exports = (config, logger) => {
     const props = { name: 'world' };
 
     let title = 'Codenames.';
-    let html = React.renderToString(React.createElement(HelloWorldComponent, props));
+    let html = '<div id="codename"></div>';
 
     this.body = template.render({ title, html });
   }));
+
+  app.use(assets(path.resolve(__dirname, 'client')));
 
   app.use(function *() {
     throw errors.notFound(`Not found ${this.originalUrl}`);
