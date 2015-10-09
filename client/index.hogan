@@ -18,7 +18,9 @@
     <script src="app.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        codename(document.getElementById('codename'));
+        codename(document.getElementById('codename'), {
+          apiUrl: 'http://codenames.mechanique.co/api/codenames?lists=crayons,cities&filters=alliterative,random'
+        });
       });
     </script>
   </body>
